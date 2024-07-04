@@ -1,4 +1,15 @@
 // script.js
+// url更新
+linkElement.href = linkUrl;
+linkElement.textContent = linkText;
+function updateLink(elementId, url, text) {
+    const element = document.getElementById(elementId);
+    element.href = url;
+    element.textContent = text;
+}
+updateLink("ysekine", "https://ysekine.w.waseda.jp/", "早稲田大学関根泰教授");
+updateLink("tsugimoto", "https://sugimoto.ims.ac.jp/", "分子科学研究所杉本敏樹准教授");
+
 // back to top
 document.addEventListener('DOMContentLoaded', function() {
     var backToTopButton = document.getElementById("back-to-top");
