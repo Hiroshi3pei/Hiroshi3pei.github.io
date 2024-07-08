@@ -1,14 +1,19 @@
 // script.js
 // url更新
-linkElement.href = linkUrl;
-linkElement.textContent = linkText;
-function updateLink(elementId, url, text) {
-    const element = document.getElementById(elementId);
+function updateLinks(className, url, text) {
+  const elements = document.getElementsByClassName(className);
+  for (let element of elements) {
     element.href = url;
     element.textContent = text;
+  }
 }
-updateLink("ysekine", "https://ysekine.w.waseda.jp/", "早稲田大学関根泰教授");
-updateLink("tsugimoto", "https://sugimoto.ims.ac.jp/", "分子科学研究所杉本敏樹准教授");
+document.addEventListener('DOMContentLoaded', function() {
+    updateLinks("ysekine", "https://ysekine.w.waseda.jp/", "早稲田大学関根泰教授");
+    updateLinks("ysekineEN", "https://ysekine.w.waseda.jp/", "Prof. Yasushi Sekine");
+    updateLinks("tsugimoto", "https://sugimoto.ims.ac.jp/", "杉本敏樹准教授");
+    updateLinks("tsugimotoEN", "https://sugimoto.ims.ac.jp/", "Sugimoto Group");
+});
+
 
 // back to top
 document.addEventListener('DOMContentLoaded', function() {
@@ -44,6 +49,88 @@ document.addEventListener('DOMContentLoaded', function() {
         currentYearSpan.textContent = currentYear;
     }
 });
+
+// 画像の右に文章を書く場合に画面サイズに応じて文字を改行するが、改行が多くなって画像サイズを超えるなら画像も変える
+document.addEventListener("DOMContentLoaded", function() {
+    var lazyImages = [].slice.call(document.querySelectorAll("img.lazy"));
+
+    function adjustImageSize() {
+        const content = document.querySelector('.content');
+        const img = content.querySelector('.content-image');
+        const text = content.querySelector('.content-text');
+        
+        // リセット
+        img.style.width = '300px';
+        
+        // 画像と文章の高さを比較
+        if (text.offsetHeight > img.offsetHeight) {
+            // 文章が画像より高い場合、画像を縮小
+            const ratio = img.offsetHeight / text.offsetHeight;
+            img.style.width = `${300 * ratio}px`;
+        }
+    }
+
+    if ("IntersectionObserver" in window) {
+        let lazyImageObserver = new IntersectionObserver(function(entries, observer) {
+            entries.forEach(function(entry) {
+                if (entry.isIntersecting) {
+                    let lazyImage = entry.target;
+                    lazyImage.src = lazyImage.dataset.src;
+                    lazyImage.classList.remove("lazy");
+                    lazyImageObserver.unobserve(lazyImage);
+                    
+                    // 画像が読み込まれた後にサイズを調整
+                    lazyImage.onload = adjustImageSize;
+                }
+            });
+        });
+
+        lazyImages.forEach(function(lazyImage) {
+            lazyImageObserver.observe(lazyImage);
+        });
+    } else {
+        // Intersection Observerがサポートされていない場合のフォールバック
+        let active = false;
+
+        const lazyLoad = function() {
+            if (active === false) {
+                active = true;
+
+                setTimeout(function() {
+                    lazyImages.forEach(function(lazyImage) {
+                        if ((lazyImage.getBoundingClientRect().top <= window.innerHeight && lazyImage.getBoundingClientRect().bottom >= 0) && getComputedStyle(lazyImage).display !== "none") {
+                            lazyImage.src = lazyImage.dataset.src;
+                            lazyImage.classList.remove("lazy");
+
+                            lazyImage.onload = adjustImageSize;
+
+                            lazyImages = lazyImages.filter(function(image) {
+                                return image !== lazyImage;
+                            });
+
+                            if (lazyImages.length === 0) {
+                                document.removeEventListener("scroll", lazyLoad);
+                                window.removeEventListener("resize", lazyLoad);
+                                window.removeEventListener("orientationchange", lazyLoad);
+                            }
+                        }
+                    });
+
+                    active = false;
+                }, 200);
+            }
+        };
+
+        document.addEventListener("scroll", lazyLoad);
+        window.addEventListener("resize", lazyLoad);
+        window.addEventListener("orientationchange", lazyLoad);
+    }
+
+    // 初期化時と画面リサイズ時にも実行
+    window.addEventListener('load', adjustImageSize);
+    window.addEventListener('resize', adjustImageSize);
+});
+
 
 // Publication list bar
 document.addEventListener('DOMContentLoaded', function() {
@@ -131,85 +218,4 @@ document.addEventListener('DOMContentLoaded', function() {
 
     window.addEventListener('scroll', updateActiveSection);
     window.addEventListener('resize', adjustNavBarHeight);
-});
-
-// 画像の右に文章を書く場合に画面サイズに応じて文字を改行するが、改行が多くなって画像サイズを超えるなら画像も変える
-document.addEventListener("DOMContentLoaded", function() {
-    var lazyImages = [].slice.call(document.querySelectorAll("img.lazy"));
-
-    function adjustImageSize() {
-        const content = document.querySelector('.content');
-        const img = content.querySelector('.content-image');
-        const text = content.querySelector('.content-text');
-        
-        // リセット
-        img.style.width = '300px';
-        
-        // 画像と文章の高さを比較
-        if (text.offsetHeight > img.offsetHeight) {
-            // 文章が画像より高い場合、画像を縮小
-            const ratio = img.offsetHeight / text.offsetHeight;
-            img.style.width = `${300 * ratio}px`;
-        }
-    }
-
-    if ("IntersectionObserver" in window) {
-        let lazyImageObserver = new IntersectionObserver(function(entries, observer) {
-            entries.forEach(function(entry) {
-                if (entry.isIntersecting) {
-                    let lazyImage = entry.target;
-                    lazyImage.src = lazyImage.dataset.src;
-                    lazyImage.classList.remove("lazy");
-                    lazyImageObserver.unobserve(lazyImage);
-                    
-                    // 画像が読み込まれた後にサイズを調整
-                    lazyImage.onload = adjustImageSize;
-                }
-            });
-        });
-
-        lazyImages.forEach(function(lazyImage) {
-            lazyImageObserver.observe(lazyImage);
-        });
-    } else {
-        // Intersection Observerがサポートされていない場合のフォールバック
-        let active = false;
-
-        const lazyLoad = function() {
-            if (active === false) {
-                active = true;
-
-                setTimeout(function() {
-                    lazyImages.forEach(function(lazyImage) {
-                        if ((lazyImage.getBoundingClientRect().top <= window.innerHeight && lazyImage.getBoundingClientRect().bottom >= 0) && getComputedStyle(lazyImage).display !== "none") {
-                            lazyImage.src = lazyImage.dataset.src;
-                            lazyImage.classList.remove("lazy");
-
-                            lazyImage.onload = adjustImageSize;
-
-                            lazyImages = lazyImages.filter(function(image) {
-                                return image !== lazyImage;
-                            });
-
-                            if (lazyImages.length === 0) {
-                                document.removeEventListener("scroll", lazyLoad);
-                                window.removeEventListener("resize", lazyLoad);
-                                window.removeEventListener("orientationchange", lazyLoad);
-                            }
-                        }
-                    });
-
-                    active = false;
-                }, 200);
-            }
-        };
-
-        document.addEventListener("scroll", lazyLoad);
-        window.addEventListener("resize", lazyLoad);
-        window.addEventListener("orientationchange", lazyLoad);
-    }
-
-    // 初期化時と画面リサイズ時にも実行
-    window.addEventListener('load', adjustImageSize);
-    window.addEventListener('resize', adjustImageSize);
 });
