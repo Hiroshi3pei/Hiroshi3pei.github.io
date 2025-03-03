@@ -12,6 +12,7 @@ document.addEventListener('DOMContentLoaded', function() {
     updateLinks("ysekineEN", "https://ysekine.w.waseda.jp/", "Prof. Yasushi Sekine");
     updateLinks("tsugimoto", "https://sugimoto.ims.ac.jp/", "杉本敏樹准教授");
     updateLinks("tsugimotoEN", "https://sugimoto.ims.ac.jp/", "Sugimoto Group");
+    updateLinks("Saeys", "https://www.lct.ugent.be/people/mark-saeys", "Prof. Mark Saeys");
 });
 
 
